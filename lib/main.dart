@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_home/crontroller_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(),
+      home: ControllerPage(),
     );
   }
 }
@@ -200,6 +201,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               height: 24,
             ),
             onPressed: () {
+              if (index == 1) {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => ControllerPage()));
+                return;
+              }
               setState(() {
                 _selectedNavButtonIndex = index;
               });
@@ -264,7 +270,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget _buildControlPage(int index) {
     final double singleCellWidth =
         (MediaQuery.of(context).size.width - 16 - 32) / 2;
-    final double singleCellHeight = 136;
+    final double singleCellHeight = 156;
 
     return Padding(
       key: PageStorageKey(index),
