@@ -17,7 +17,8 @@ class _ControllerPageState extends State<ControllerPage>
     with TickerProviderStateMixin {
   TabController _tabController;
   int _selectedNavButtonIndex = 1;
-
+  double _circularSliderAngle = 45;
+  double _circularRodAngle = 270;
   @override
   void initState() {
     super.initState();
@@ -41,7 +42,12 @@ class _ControllerPageState extends State<ControllerPage>
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Icon(Icons.arrow_back_ios, color: kColorGray),
+                      child: InkWell(
+                        child: Icon(Icons.arrow_back_ios, color: kColorGray),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
                     ),
                   ),
                   Icon(
@@ -103,7 +109,10 @@ class _ControllerPageState extends State<ControllerPage>
                 child: TabBarView(
                   controller: _tabController,
                   children: List.generate(equipmentTitles.length, (index) {
-                    return _buildControlPage(index);
+                    if (index == 0)
+                      return _buildControlPage(index);
+                    else
+                      return Container();
                   }),
                 ),
               ),
@@ -195,14 +204,6 @@ class _ControllerPageState extends State<ControllerPage>
     );
   }
 
-  static List<String> tabLabels = [
-    "Living Room",
-    "Drawing Room",
-    "Kitchen",
-    "Dining",
-    "Office",
-  ];
-
   static List<String> equipmentTitles = [
     "AC",
     "Light",
@@ -211,23 +212,6 @@ class _ControllerPageState extends State<ControllerPage>
     "Fan",
     "Sound",
   ];
-  static List<String> equipmentDescriptions = [
-    "Samsung EX43",
-    "Philips 900",
-    "Samsung RK55 4K",
-    "Xiaomi 4c",
-    "Philips SG021",
-    "Micro lab M - 108",
-  ];
-  static List<String> equipmentIcons = [
-    "assets/ic_air_conditioner.png",
-    "assets/ic_idea.png",
-    "assets/ic_monitor.png",
-    "assets/ic_wifi.png",
-    "assets/ic_fan.png",
-    "assets/ic_sound.png",
-  ];
-
   Widget _buildControlPage(int index) {
     return SingleChildScrollView(
       child: Container(
@@ -258,8 +242,20 @@ class _ControllerPageState extends State<ControllerPage>
                 children: [
                   Expanded(
                     child: FlatButton(
-                      child: Icon(Icons.add),
-                      onPressed: () {},
+                      child: Text(
+                        "-",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _circularRodAngle -= 5;
+                          _circularRodAngle += 360;
+                          _circularRodAngle %= 360;
+                        });
+                      },
                     ),
                   ),
                   Container(
@@ -272,8 +268,19 @@ class _ControllerPageState extends State<ControllerPage>
                   ),
                   Expanded(
                     child: FlatButton(
-                      child: Icon(Icons.add),
-                      onPressed: () {},
+                      child: Text(
+                        "+",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _circularRodAngle += 5;
+                          _circularRodAngle %= 360;
+                        });
+                      },
                     ),
                   ),
                 ],
@@ -320,6 +327,7 @@ class _ControllerPageState extends State<ControllerPage>
   }
 
   Widget _buildController() {
+    var degree = (_circularSliderAngle / 360.0 * 99.0).toStringAsFixed(1);
     return Stack(
       children: [
         Container(
@@ -334,7 +342,7 @@ class _ControllerPageState extends State<ControllerPage>
                 )
               ]),
         ),
-        _buildRods(270),
+        _buildRods(_circularRodAngle),
         _buildSlider(),
         Container(
           margin: EdgeInsets.all(12),
@@ -390,7 +398,7 @@ class _ControllerPageState extends State<ControllerPage>
           margin: EdgeInsets.all(36),
           alignment: Alignment.center,
           child: Text(
-            "25.0° C",
+            "$degree° C",
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
@@ -402,9 +410,10 @@ class _ControllerPageState extends State<ControllerPage>
     );
   }
 
-  Widget _buildRods(int angleLim) {
+  Widget _buildRods(double angleLim) {
     int count = (angleLim / 4).ceil();
     return Stack(
+      key: PageStorageKey(angleLim),
       children: List.generate(count, (index) {
         return Align(
           alignment: Alignment.topCenter,
@@ -426,23 +435,62 @@ class _ControllerPageState extends State<ControllerPage>
   }
 
   Widget _buildSlider() {
+    return CircularSliderWidget(
+      size: 250,
+      initialAngle: _circularSliderAngle,
+      callback: (angle) {
+        setState(() {
+          _circularSliderAngle = angle;
+        });
+      },
+    );
+  }
+}
+
+typedef OnSliderUpdateCallback = Function(double);
+
+class CircularSliderWidget extends StatefulWidget {
+  final double size;
+  final double initialAngle;
+  final OnSliderUpdateCallback callback;
+  const CircularSliderWidget({
+    Key key,
+    this.size,
+    this.initialAngle,
+    this.callback,
+  }) : super(key: key);
+
+  @override
+  _CircularSliderWidgetState createState() => _CircularSliderWidgetState();
+}
+
+class _CircularSliderWidgetState extends State<CircularSliderWidget> {
+  double _kSize;
+  double _angle;
+
+  @override
+  void initState() {
+    super.initState();
+    _angle = widget.initialAngle;
+    _kSize = widget.size;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        print("tabpped");
-      },
-      onVerticalDragUpdate: (details) {
-        print("onVerticalDragUpdate");
-        print(details.delta.dy);
-      },
-      onHorizontalDragUpdate: (details) {
-        print("onHorizontalDragUpdate");
-        print(details.delta.dx);
-      },
+      onVerticalDragUpdate: (details) => onDrag(details.localPosition),
+      onHorizontalDragUpdate: (details) => onDrag(details.localPosition),
       child: CustomPaint(
-        size: Size(250, 250),
-        painter: CirclularSlider(45),
+        size: Size(_kSize, _kSize),
+        painter: CirclularSlider(_angle),
       ),
     );
+  }
+
+  void onDrag(Offset offset) {
+    final _currentOffset = Offset(_kSize / 2, _kSize / 2) - offset;
+    _angle = (_currentOffset.direction * 180 / pi - 90 + 360).abs() % 360;
+    widget.callback?.call(_angle);
   }
 }
 
@@ -491,7 +539,8 @@ class CirclularSlider extends CustomPainter {
     canvas.drawCircle(handlerCenter, handlerRadius, handlerPaint);
 
     path = new Path()
-      ..addOval(Rect.fromCircle(center: handlerCenter, radius: handlerRadius))
+      ..addOval(
+          Rect.fromCircle(center: handlerCenter, radius: handlerRadius * 1.5))
       ..close();
   }
 
