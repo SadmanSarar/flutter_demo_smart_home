@@ -9,6 +9,7 @@ void main() {
 
 final Color kColorGray = const Color(0xFF707070);
 final Color kPrimaryColor = const Color(0xFF7366FE);
+final Color kBackgroundColor = const Color(0xFFF7F7F7);
 
 class MyApp extends StatelessWidget {
   @override
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        backgroundColor: kBackgroundColor,
       ),
       home: MyHomePage(),
     );

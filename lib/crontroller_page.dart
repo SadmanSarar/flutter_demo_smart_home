@@ -216,7 +216,6 @@ class _ControllerPageState extends State<ControllerPage>
     return SingleChildScrollView(
       child: Container(
         key: PageStorageKey(index),
-        color: Color(0xFFF7F7F7),
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
